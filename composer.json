@@ -11,7 +11,7 @@
       }
     },
     "require": {
-		"beingnikhilesh/Error": "*"
+		"beingnikhilesh/error": "*"
 	},
     "minimum-stability": "dev",
     "prefer-stable": true
