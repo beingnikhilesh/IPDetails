@@ -1,0 +1,18 @@
+{
+    "name": "beingnikhilesh/ipdetails",
+    "description": "IPDetails is a PHP Library that make it easy to get the Details of the IP from various IP Details providing Websites Online.",
+    "keywords": [
+          "php", "IP", "Internet Protocol", "ipapi.co", "ipgeolocation.io", "freegeoip"
+      ],
+    "license": "MIT",
+    "autoload": {
+      "psr-4": {
+        "beingnikhilesh\\IPDetails\\": "src/"
+      }
+    },
+    "require": {
+		"beingnikhilesh/Error": "*"
+	},
+    "minimum-stability": "dev",
+    "prefer-stable": true
+}
