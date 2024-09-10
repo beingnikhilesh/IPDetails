@@ -4,6 +4,7 @@ namespace beingnikhilesh\IPDetails\Enums;
 
 enum IPErrors: string
 {
+    case INVALID_INPUTS = "Invalid Inputs Provided";
     case EMPTY_RESPONSE = "No Response Recieved for the Query";
     case INVALID_QUERY = "The Query is Invalid";
     case ACCOUNT_LOCKED = 'Your Account has been Locked';
@@ -15,9 +16,13 @@ enum IPErrors: string
     case PRIVATE_IP_POOL = 'The Provided IP Pool is Private';
     case UNKNOWN_ERROR = 'An Unknown Error was recieved from the Provider';
     case DECODE_ERROR = 'The Response recieved is not in a Valid Format';
-        # JSON and XML Errors
+    # JSON and XML Errors
     case JSON_ERROR = "The JSON Recieved is not in the Standard Format";
     case XML_ERROR = "The XML Recieved is not in the Standard Format";
     case DATA_ERROR = "The DATA Recieved is not in the Standard Format";
+    case MISSING_API_KEY ="Insert Key Here"; 
+    # NETWORK ERRORS
+    case NO_NETWORK = 'Seems that we cannot connect to the Internet';
+    case TOO_MANY_REDIRECTS = 'Seems like the request has redirected too many times';
 
 }

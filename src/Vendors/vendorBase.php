@@ -5,6 +5,8 @@ namespace beingnikhilesh\IPDetails\Vendors;
 use beingnikhilesh\IPDetails\Enums\IPErrors;
 use beingnikhilesh\IPDetails\Config;
 use beingnikhilesh\IPDetails\Error\Error;
+use ReflectionClass;
+
 class vendorBase
 {
     #################################################
@@ -17,11 +19,9 @@ class vendorBase
 
     /** Construct Function */
     function __construct(protected ?array $settings = [])
-    { 
-
+    {
         if (empty($settings))
             $this->settings = (new Config(get_class($this)))->get();
-        
     }
 
     #################################################
@@ -58,23 +58,33 @@ class vendorBase
             $requestOptions = array_merge($requestOptions, $params);
 
         # Make the Actual Query
-
         try {
             $response = $client->request($requestType, $url, $requestOptions);
-            $response = $response->getBody()->getContents();
-            return [1, $response];
-        } catch (\GuzzleHttp\Exception\ClientException $j) {
-            $response = (string) $j->getResponse()->getBody(true);
-            return [0, $response, $j->getCode()];
+            $responseBody = $response->getBody()->getContents();
+            return ['success' => 1, 'error_code' => empty($responseBody) ? IPErrors::EMPTY_RESPONSE : '', 'response' => $responseBody];
+        } catch (\GuzzleHttp\Exception\TooManyRedirectsException $e) {
+            # if the Request / Response is redirecting too much and not returning any response, Handle the TooManyRedirectsException Here
+            return ['success' => 0, 'error_code' => IPErrors::TOO_MANY_REDIRECTS, 'response' => 'Redirect Error: ' . $e->getMessage()];
+        } catch (\GuzzleHttp\Exception\ConnectException $e) {
+            # if Internet Connection is not Available, Handle the ConnectException Here
+            return ['success' => 0, 'error_code' => IPErrors::NO_NETWORK, 'response' => 'Network Error: ' . substr($e->getMessage(), 0, 60)];
+        } catch (\GuzzleHttp\Exception\ClientException | \GuzzleHttp\Exception\ServerException $e) {
+            # Handle the ClientException & Server Exception here
+            $response = (string) $e->getResponse()->getBody(true);
+            return ['success' => 0, 'error_code' => '', 'response' => $response, 'header_code' => $e->getCode()];
+        } catch (\Exception $e) {
+            # Handle the Generic Exception here
+            
         }
     }
 
-    public function _formatErrorResponse(IPErrors $errorCode)
+    public function _formatErrorResponse(IPErrors $errorCode, string $returnMessage = '')
     {
         return [
             'error' => 1,
             'msg' => $errorCode->value,
             'code' => $errorCode->name,
+            'additional_message' => $returnMessage,
             'data' => []
         ];
     }
@@ -84,6 +94,7 @@ class vendorBase
         return [
             'error' => 0,
             'msg' => 'success',
+            'service' => (new ReflectionClass($this))->getShortName(),
             'data' => $this->_mapValues($this->responseArrayFormat, $arrayMap, $values)
         ];
     }

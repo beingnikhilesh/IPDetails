@@ -7,11 +7,15 @@ use beingnikhilesh\IPDetails\Vendors\vendorBase;
 use beingnikhilesh\IPDetails\Formats\IPLocationInterface;
 
 class ipgeolocation extends vendorBase implements IPLocationInterface
-{   
+{
     # Documentation - https://ipgeolocation.io/documentation/ip-geolocation-api.html
 
-    public function getIPDetails(string $ip)
-    {   
+    public function getIPDetails(string $ip = '')
+    {
+        # Check if there is no Key Set
+        if (empty($this->settings['key']))
+            return $this->_formatErrorResponse(IPErrors::MISSING_API_KEY);
+
         $response = $this->_get($this->settings['url'] .  '?' . http_build_query([
             'ip' => $ip,
             'apiKey' => ($this->settings['key']),
@@ -23,22 +27,21 @@ class ipgeolocation extends vendorBase implements IPLocationInterface
         return $this->_formatResponse($response);
     }
     public function _formatResponse($rawResponse)
-    {   
+    {
         # Check if $rawResponse is an array and has the correct structure
         if (empty($rawResponse) or !is_array($rawResponse))
             return $this->_formatErrorResponse(IPErrors::EMPTY_RESPONSE);
 
         # Decode the JSON String
-        $JSONDecodedIPDetails = json_decode($rawResponse[1], TRUE);
-
+        $JSONDecodedIPDetails = json_decode($rawResponse['response'], TRUE);
         if ($JSONDecodedIPDetails === null && json_last_error() !== JSON_ERROR_NONE)
             return $this->_formatErrorResponse(IPErrors::JSON_ERROR);
 
         # The Response is Error, Decode and return the Response
-        if (!$rawResponse[0])
+        if (!$rawResponse['success'])
             return $this->_formatErrorResponse(
-                (!empty($this->errorArrayMap[$rawResponse[2]]))
-                    ? $this->errorArrayMap[$rawResponse[2]]
+                (!empty($this->errorArrayMap[$rawResponse['header_code']]))
+                    ? $this->errorArrayMap[$rawResponse['header_code']]
                     : IPErrors::UNKNOWN_ERROR
             );
         ## The Response is Success

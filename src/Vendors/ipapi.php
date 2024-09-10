@@ -26,16 +26,16 @@ class ipapi extends vendorBase implements IPLocationInterface
             return $this->_formatErrorResponse(IPErrors::EMPTY_RESPONSE);
 
         # Check if there was an Error Message in the HTTP request
-        if (!$rawResponse[0]) {
+        if (!$rawResponse['success']) {
             return $this->_formatErrorResponse(
-                (!empty($this->headerErrorMap[$rawResponse[2]]))
-                    ? $this->headerErrorMap[$rawResponse[2]]
+                (!empty($this->headerErrorMap[$rawResponse['header_code']]))
+                    ? $this->headerErrorMap[$rawResponse['header_code']]
                     : IPErrors::UNKNOWN_ERROR
             );
         }
 
         # There is some Response, Decode it
-        $JSONDecodedIPDetails = json_decode(@$rawResponse[1], TRUE);
+        $JSONDecodedIPDetails = json_decode($rawResponse['response'], TRUE);
         if ($JSONDecodedIPDetails === null && json_last_error() !== JSON_ERROR_NONE)
             return $this->_formatErrorResponse(IPErrors::JSON_ERROR);
         // echoALl([$this->errorArrayMap, $JSONDecodedIPDetails, $JSONDecodedIPDetails['message'], isset($this->errorArrayMap[$JSONDecodedIPDetails['message']])]);

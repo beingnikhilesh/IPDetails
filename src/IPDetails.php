@@ -2,6 +2,7 @@
 
 namespace beingnikhilesh\IPDetails;
 
+use beingnikhilesh\IPDetails\Enums\IPErrors;
 use beingnikhilesh\IPDetails\Error\Error;
 
 class IPDetails
@@ -14,14 +15,15 @@ class IPDetails
     function __construct(private string $vendor = '')
     {
         $this->config = new Config($vendor);
-        // echoALl([$vendor, $this->config]);
     }
 
     /** Function to get the IPDetails */
-    function getIPDetails(string $ip)
+    function getIPDetails(string $ip = '')
     {
         if (empty($ip))
             return Error::set_error('Invalid IP Address Provided to get the Details');
+
+        # Call and Return the Details
         $className = $this->vendorLocation . $this->config->getName();
         return (new $className($this->config->get()))->getIPDetails($ip);
     }

@@ -14,26 +14,28 @@ use beingnikhilesh\IPDetails\Formats\IPLocationInterface;
 
 class freegeoip extends vendorBase implements IPLocationInterface
 {
-    # Documentation - 
-
+    # Documentation - https://ipbase.com/docs
     # Get the IP Details
     public function getIPDetails(string $ip)
     {
+        # Check if there is no Key Set
+        if (empty($this->settings['key']))
+            return $this->_formatErrorResponse(IPErrors::MISSING_API_KEY);
+        
         # Get the IP Details using the _post or _get methods
         $response = $this->_get($this->settings['url'] . $ip . '?apikey=' . $this->settings['key']);
-        echo( $response);
         return $this->_formatResponse($response);
     }
 
     # Format the Response received from freegeoip
     public function _formatResponse($rawResponse)
-    {
-        # Check if $rawResponse is an array and has the correct structure
-        if (empty($rawResponse) or !is_array($rawResponse))
-            return $this->_formatErrorResponse(IPErrors::EMPTY_RESPONSE);
+    {   // echoAll([$rawResponse, IPErrors::class, is_a($rawResponse['error_code'], IPErrors::class)]);
+        # Check if Error Enum is Set
+        if (is_a($rawResponse['error_code'], IPErrors::class))
+            return $this->_formatErrorResponse($rawResponse['error_code'], $rawResponse['response']);
 
         # Decode the JSON String
-        $JSONDecodedIPDetails = json_decode($rawResponse[1], TRUE);
+        $JSONDecodedIPDetails = json_decode($rawResponse['response'], TRUE);
         if ($JSONDecodedIPDetails === null && json_last_error() !== JSON_ERROR_NONE)
             return $this->_formatErrorResponse(IPErrors::JSON_ERROR);
 
